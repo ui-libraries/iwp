@@ -1,12 +1,13 @@
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon"
       type="image/png"
       href="images/favicon.png">
-  <meta charset="utf-8">
-  <title>IWP Map</title>
+  <title>IWP Map: International Writing Program participants by country and year</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@0.6.2/dist/leaflet.css" />
   <link href='https://api.mapbox.com/mapbox-assembly/v0.8.0/assembly.min.css' rel='stylesheet'>
   <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
@@ -114,19 +115,26 @@
       cursor:pointer;
     }
 
+    /* A11Y: darker button colors (white text 7.05:1; hover 11.4:1; was 3.85:1 / 2.13:1),
+       larger text and touch targets (WCAG 1.4.3, 2.5.8) */
     #formsubmit, #formreset, #timeline-anm, #timeline-button {
-      background-color: #008CBA;
-      color: white;
-      padding: 4px 8px;
+      background-color: #00607F;
+      color: #FFFFFF;
+      border: 0;
+      padding: 8px 14px;
+      min-height: 24px;
       border-radius: 6px;
       text-align: center;
       text-decoration: none;
       display: inline-block;
-      font-size: 12px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      cursor: pointer;
     }
 
     #formsubmit:hover, #formreset:hover, #timeline-anm:hover, #timeline-button:hover {
-      background-color: #72bcd4;
+      background-color: #003F54;
+      color: #FFFFFF;
     }
 
     #formsubmit {
@@ -136,12 +144,138 @@
     #timeline-anm {
       margin: 5px;
     }
+
+    /* ===== ACCESSIBILITY STYLES ===== */
+
+    /* Visually hidden, still available to screen readers */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Skip links: hidden until they receive keyboard focus */
+    .skip-link {
+      position: absolute;
+      left: 8px;
+      top: -100px;
+      z-index: 2000;
+      background: #000000;
+      color: #FFFFFF;
+      padding: 10px 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.875rem;
+      border-radius: 0 0 6px 6px;
+    }
+    .skip-link:focus {
+      top: 0;
+    }
+
+    /* Visible keyboard focus on every interactive element (WCAG 2.4.7) */
+    a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible,
+    summary:focus-visible, [tabindex]:focus-visible {
+      outline: 3px solid #005FCC !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 5px #FFFFFF;
+    }
+
+    /* Form structure */
+    fieldset {
+      border: 0;
+      margin: 0;
+      padding: 0;
+    }
+    legend {
+      padding: 0;
+      font-weight: bold;
+    }
+    label {
+      cursor: pointer;
+    }
+    .menu_item {
+      margin-bottom: 8px;
+    }
+    select {
+      font-size: 1rem;
+      max-width: 100%;
+    }
+    a {
+      color: #00508A;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-family: 'Montserrat', sans-serif;
+      margin: 12px 0 4px 0;
+    }
+
+    /* Text-equivalent results table */
+    #results {
+      margin-top: 16px;
+    }
+    #results summary {
+      cursor: pointer;
+      font-weight: bold;
+      padding: 4px 0;
+    }
+    #results-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.875rem;
+      margin-top: 8px;
+    }
+    #results-table caption {
+      text-align: left;
+      font-weight: bold;
+      padding-bottom: 4px;
+    }
+    #results-table th, #results-table td {
+      border: 1px solid #595959;
+      padding: 4px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    #results-table ul {
+      margin: 4px 0 0 0;
+      padding-left: 18px;
+    }
+
+    /* Respect reduced-motion preference (WCAG 2.3.3 / good practice) */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+
+    /* Reflow: stack the filters above the map on narrow screens / high zoom (WCAG 1.4.10) */
+    @media (max-width: 800px) {
+      #leftcolumn, #contentcolumn {
+        float: none;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      #map {
+        position: relative;
+        width: 100%;
+        height: 70vh;
+        border-left: 0;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <a class="skip-link" href="#map">Skip to map</a>
+  <a class="skip-link" href="#results-heading">Skip to results table</a>
   <div id="container">
-    <div id="contentwrapper">
+    <main id="contentwrapper">
       <!--
       <header>
         <h1>THE UNIVERSITY OF IOWA INTERNATIONAL WRITING PROGRAM: 1966-PRESENT</h1>
@@ -149,19 +283,23 @@
       -->
       <div id="leftcolumn">
         <div class="innertube">
-          <form id="map_parameters" name="map_parameters" action="#" accept-charset="utf-8" class="inlineForm">
+          <form id="map_parameters" name="map_parameters" action="#" accept-charset="utf-8" class="inlineForm" aria-label="Filter the map">
             <!--<form id="map_parameters" name="map_parameters" action="http://iwp.lib.uiowa.edu/index.php/iwpmap" method="post" accept-charset="utf-8" class="inlineForm">-->
             <!-- 	hidden input fields will be modified by the time slider -->
             <input id="timeline_start" name="timeline_start" type="hidden" value="1966">
             <input id="timeline_end" name="timeline_end" type="hidden" value="2023">
-            <input id="timeline_display" name="timeline_display" type="hidden" value="none" ;="" <hr="">
-            <ul class="no_marker">
-              <a href="https://iwp.uiowa.edu/" target="_blank"><img class='logo-resize' src='images/iwp-logo.png'/></a>
+            <input id="timeline_display" name="timeline_display" type="hidden" value="none">
+            <div class="intro">
+              <a href="https://iwp.uiowa.edu/" target="_blank" rel="noopener"><img class='logo-resize' src='images/iwp-logo.png' alt="University of Iowa International Writing Program home page (opens in a new window)"/></a>
               <h1>THE UNIVERSITY OF IOWA INTERNATIONAL WRITING PROGRAM: 1967-PRESENT</h1>
-              <p>Search the database of over 1,500 IWP participants since 1967 by
+              <p id="map-instructions">Search the database of over 1,500 IWP participants since 1967 by
                 any combination of categories. Totals are for instances of
-                participation, and writers may have participated more than once.</p>
-              <li class="menu_item"><strong>Country:</strong>
+                participation, and writers may have participated more than once.
+                Choose your filters, then select "Apply Query". The map and a text table of results update.</p>
+            </div>
+            <h2 class="sr-only">Filters</h2>
+            <ul class="no_marker">
+              <li class="menu_item"><label for="country"><strong>Country:</strong></label>
                 <select id="country">
                   <option value="0" selected="selected">[any]</option>
                   <option value="1901">Afghanistan</option>
@@ -317,7 +455,7 @@
                   <option value="1899">Zimbabwe</option>
                 </select>
               </li>
-              <li class="menu_item"><strong>Region:</strong>
+              <li class="menu_item"><label for="region"><strong>Region:</strong></label>
                 <select id="region">
                   <option value="0" selected="selected">[any]</option>
                   <option value="Australia and New Zealand">Australia and New Zealand </option>
@@ -344,7 +482,7 @@
                   <option value="Western Europe">Western Europe </option>
                 </select>
               </li>
-              <li class="menu_item"><strong>Macro Region:</strong>
+              <li class="menu_item"><label for="macro_region"><strong>Macro Region:</strong></label>
                 <select id="macro_region">
                   <option value="0" selected="selected">[any]</option>
                   <option value="Africa">Africa </option>
@@ -354,7 +492,7 @@
                   <option value="The Americas">The Americas </option>
                 </select>
               </li>
-              <li class="menu_item"><strong>Year of Residency:</strong>&nbsp;&nbsp;
+              <li class="menu_item"><label for="residency"><strong>Year of Residency:</strong></label>&nbsp;&nbsp;
                 <select id="residency">
                   <option value="0">[any]</option>
                   <option value="1966">1966</option>
@@ -420,19 +558,27 @@
                 but rather only allowing for annual results. Otherwise, delete this and comment in the two radio inputs that follow.-->
                 <!--<input type="hidden" name="count_type" value="annual" class="in1" checked="checked">-->
 
-                <input type="radio" name="count_type" value="annual" class="in1" checked="checked">
-                This year only&nbsp;&nbsp;&nbsp;
-                <input type="radio" name="count_type" value="cumulative" class="in1" checked="checked">
-                Cumulative<br>
+                <fieldset>
+                  <legend class="sr-only">Count type</legend>
+                  <!-- A11Y NOTE: the original had checked="checked" on BOTH radios; browsers honor only the last one,
+                       so "Cumulative" was already the effective default. It is now the only one marked. -->
+                  <input type="radio" name="count_type" id="count_annual" value="annual" class="in1">
+                  <label for="count_annual">This year only</label>&nbsp;&nbsp;&nbsp;
+                  <input type="radio" name="count_type" id="count_cumulative" value="cumulative" class="in1" checked="checked">
+                  <label for="count_cumulative">Cumulative</label>
+                </fieldset>
 
               </li>
-              <li class="menu_item"><strong>Author Languages:</strong>
-                <input type="radio" name="multilingual" value="1" class="in1" checked="checked">
-                1+
-                <input type="radio" name="multilingual" value="2" class="in1">
-                2+<br>
+              <li class="menu_item">
+                <fieldset>
+                  <legend><strong>Author Languages:</strong></legend>
+                  <input type="radio" name="multilingual" id="lang_1plus" value="1" class="in1" checked="checked">
+                  <label for="lang_1plus">1+<span class="sr-only"> languages</span></label>
+                  <input type="radio" name="multilingual" id="lang_2plus" value="2" class="in1">
+                  <label for="lang_2plus">2+<span class="sr-only"> languages</span></label>
+                </fieldset>
               </li>
-              <li class="menu_item"><strong>Language:</strong>&nbsp;&nbsp;
+              <li class="menu_item"><label for="language"><strong>Language:</strong></label>&nbsp;&nbsp;
                 <select id="language">
                   <option value="0" selected="selected">[any]</option>
                   <option value="Afrikaans">Afrikaans </option>
@@ -512,7 +658,7 @@
                   <option value="Yiddish">Yiddish </option>
                 </select>
               </li>
-              <li class="menu_item"><strong>Writer Role:</strong>&nbsp;&nbsp;
+              <li class="menu_item"><label for="role"><strong>Writer Role:</strong></label>&nbsp;&nbsp;
                 <select id="role">
                   <option value="0" selected="selected">[any]</option>
                   <option value="activist">activist </option>
@@ -541,7 +687,7 @@
                   <option value="visual artist">visual artist </option>
                 </select>
               </li>
-              <li class="menu_item"><strong>Gender: </strong>&nbsp;&nbsp;
+              <li class="menu_item"><label for="gender"><strong>Gender:</strong></label>&nbsp;&nbsp;
                 <select id="gender">
                   <option value="0" selected="selected">[any]</option>
                   <option value="Male">Male</option>
@@ -556,7 +702,7 @@
                 Female<br>
               </li>
               -->
-              <li class="menu_item"><strong>Year of Birth:</strong>&nbsp;&nbsp;
+              <li class="menu_item"><label for="YOB"><strong>Year of Birth:</strong></label>&nbsp;&nbsp;
                 <select id="YOB">
                   <option value="0" selected="selected">[any]</option>
                   <option value="1905">1905</option>
@@ -682,7 +828,7 @@
             <hr>
             <div class="centered">
               <button id="formsubmit" type="submit" value="apply">Apply Query</button>
-              <button id="formreset" type="submit" value="reset" onclick="resetForm()">Reset Form</button>
+              <button id="formreset" type="button" value="reset" onclick="resetForm()">Reset Form</button>
               <!--
               &nbsp;&nbsp;&nbsp;
               <form action="http://iwp.lib.uiowa.edu/index.php/iwpmap" method="post" accept-charset="utf-8" class="inlineForm">
@@ -693,7 +839,22 @@
           </form>
         </div>
 
-        <div id="timeline-anm" style="cursor: pointer" class="timeline-anm" onclick="location.href='index-cumulative.html'">Cumulative Map</div>
+        <a id="timeline-anm" class="timeline-anm" href="index-cumulative.html">Cumulative Map</a>
+
+        <section id="results">
+          <h2 id="results-heading" tabindex="-1">Results as a table</h2>
+          <p>A text version of what is drawn on the map. It updates each time you apply a query.</p>
+          <details id="results-details">
+            <summary id="results-summary">Show results table</summary>
+            <table id="results-table">
+              <caption id="results-caption">Countries shown on the map</caption>
+              <thead>
+                <tr><th scope="col">Country</th><th scope="col">Writers</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </details>
+        </section>
         <!--<div id="timeline-button" style="cursor: pointer" class="timeline-btn" onclick="toggleTimeline();">
           Show Timeline
 
@@ -703,7 +864,12 @@
         </div>-->
       </div>
       <div id="contentcolumn">
-        <div id="map"></div>
+        <div id="map-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+        <p id="map-desc" class="sr-only">Interactive map of International Writing Program participants by country.
+          Each circle is a country; larger circles mean more writers. Use Tab to move between circles,
+          Enter to open the list of writers and Escape to close it. With the map focused, arrow keys pan and plus or minus zoom.
+          The same information is available as a table in the results section.</p>
+        <div id="map" role="region" aria-label="Map of International Writing Program participants" aria-describedby="map-desc"></div>
 
         <!-- ui slider -->
         <!--
@@ -721,7 +887,7 @@
         <!-- end temporal -->
 
       </div>
-    </div>
+    </main>
   </div>
   <script src="https://unpkg.com/leaflet@0.6.2/dist/leaflet.js"></script>
   <script type="text/javascript" src="js/proj4js-compressed.js"></script>
@@ -765,6 +931,12 @@
 
     // Fit the map to the world
     map.fitWorld();
+
+    // A11Y: give the Leaflet zoom buttons proper names/roles
+    Array.prototype.forEach.call(document.querySelectorAll('.leaflet-control-zoom-in, .leaflet-control-zoom-out'), function(a) {
+      a.setAttribute('role', 'button');
+      a.setAttribute('aria-label', a.classList.contains('leaflet-control-zoom-in') ? 'Zoom in' : 'Zoom out');
+    });
 
     // Define a getOpacity function
     function getOpacity(d) {
@@ -7495,7 +7667,199 @@
       });
       cumulativePart.addTo(map);
       cumulativePart.bringToFront(); // keep it from falling behind the countries layer
+
+      // A11Y: make markers keyboard operable, rebuild text table, announce result
+      syncAccessibility(cumulativePart, updateYear, countValue);
     };
+
+
+    // ======================================================================
+    // ACCESSIBILITY SUPPORT
+    // ======================================================================
+    var a11yFirstRun = true; // do not announce the automatic load-time query
+
+    // Announce a status message to screen readers (polite live region)
+    function announce(message) {
+      var el = document.getElementById('map-status');
+      el.textContent = '';
+      setTimeout(function() { el.textContent = message; }, 60);
+    }
+
+    // Read country, count and writer list out of a marker's popup HTML
+    function readPopup(layer) {
+      var props = layer.feature.properties;
+      var info = { country: props.country, count: null, writers: [] };
+      var content = layer._popup && layer._popup._content;
+      if (typeof content !== 'string') { return info; }
+      var doc = new DOMParser().parseFromString(content, 'text/html');
+      var b = doc.querySelector('b');
+      if (b) {
+        var m = b.textContent.replace(/\u00a0/g, ' ').match(/\((\d+)\)\s*$/);
+        if (m) { info.count = parseInt(m[1], 10); }
+      }
+      Array.prototype.forEach.call(doc.querySelectorAll('a'), function(a) {
+        var next = a.nextSibling;
+        info.writers.push({
+          name: a.textContent.trim(),
+          href: a.getAttribute('href'),
+          extra: (next && next.nodeType === 3) ? next.textContent.trim() : ''
+        });
+      });
+      if (info.count === null) { info.count = info.writers.length; }
+      return info;
+    }
+
+    // Keyboard + focus behavior for one marker (bound once per marker)
+    function bindMarkerKeyboard(layer) {
+      var path = layer._path;
+      path.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13 || e.keyCode === 32) {
+          e.preventDefault();
+          e.stopPropagation();
+          layer.openPopup();
+        }
+      });
+      // visible focus indicator on the circle itself (WCAG 2.4.7, 1.4.11)
+      path.addEventListener('focus', function() {
+        layer.setStyle({ color: '#000000', weight: 3 });
+      });
+      path.addEventListener('blur', function() {
+        layer.setStyle({ color: '#873620', weight: 1 });
+      });
+      layer._a11yBound = true;
+    }
+
+    // Rebuild the marker semantics, the results table and the status message
+    function syncAccessibility(cumulativePart, updateYear, countValue) {
+      var rows = [];
+      var totalWriters = 0;
+
+      cumulativePart.eachLayer(function(layer) {
+        var path = layer._path;
+        if (!path) { return; }
+        path.setAttribute('data-marker', 'true');
+        if (!layer._a11yBound) { bindMarkerKeyboard(layer); }
+
+        if (layer.options.radius > 0) { // (Leaflet 0.6: CircleMarker radius lives in options.radius)
+          var info = readPopup(layer);
+          var label = info.country + ': ' + info.count + (info.count === 1 ? ' writer' : ' writers') +
+            '. Press Enter to show names.';
+          path.setAttribute('tabindex', '0');
+          path.setAttribute('role', 'button');
+          path.setAttribute('aria-haspopup', 'dialog');
+          path.setAttribute('aria-label', label);
+          path.removeAttribute('aria-hidden');
+          rows.push(info);
+          totalWriters += info.count;
+        } else {
+          // hidden (zero-radius) circles must not be focusable or announced
+          path.setAttribute('tabindex', '-1');
+          path.setAttribute('aria-hidden', 'true');
+          path.removeAttribute('role');
+          path.removeAttribute('aria-label');
+          path.removeAttribute('aria-haspopup');
+        }
+      });
+
+      // Purely decorative map paths (graticule, land, nation outlines) are hidden from assistive tech
+      var root = map.getPanes().overlayPane.querySelector('svg');
+      if (root) {
+        Array.prototype.forEach.call(root.querySelectorAll('path'), function(p) {
+          if (!p.hasAttribute('data-marker')) { p.setAttribute('aria-hidden', 'true'); }
+        });
+      }
+
+      // ---- text-equivalent results table ----
+      rows.sort(function(a, b) { return a.country.localeCompare(b.country); });
+      var tbody = document.querySelector('#results-table tbody');
+      while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
+      rows.forEach(function(r) {
+        var tr = document.createElement('tr');
+        var th = document.createElement('th');
+        th.setAttribute('scope', 'row');
+        th.textContent = r.country;
+        var td = document.createElement('td');
+        if (r.writers.length) {
+          var details = document.createElement('details');
+          var summary = document.createElement('summary');
+          summary.textContent = r.count + (r.count === 1 ? ' writer' : ' writers');
+          var ul = document.createElement('ul');
+          r.writers.forEach(function(w) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.setAttribute('href', w.href);
+            a.textContent = w.name;
+            li.appendChild(a);
+            if (w.extra) { li.appendChild(document.createTextNode(' ' + w.extra)); }
+            ul.appendChild(li);
+          });
+          details.appendChild(summary);
+          details.appendChild(ul);
+          td.appendChild(details);
+        } else {
+          td.textContent = String(r.count);
+        }
+        tr.appendChild(th);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      });
+
+      var when = (countValue === 'cumulative') ? ('cumulative through ' + updateYear) : ('in ' + updateYear);
+      var summaryText;
+      if (rows.length === 0) {
+        summaryText = 'No countries match the selected filters ' + when + '.';
+      } else {
+        summaryText = 'Showing ' + rows.length + (rows.length === 1 ? ' country and ' : ' countries and ') +
+          totalWriters + (totalWriters === 1 ? ' writer ' : ' writers ') + when + '.';
+      }
+      document.getElementById('results-summary').textContent =
+        'Show results table (' + rows.length + (rows.length === 1 ? ' country)' : ' countries)');
+      document.getElementById('results-caption').textContent = 'Countries shown on the map: ' + summaryText;
+
+      if (a11yFirstRun) { a11yFirstRun = false; } else { announce('Map updated. ' + summaryText); }
+    }
+
+    // ---- popups behave like dialogs: named, focusable, scrollable, Escape to close ----
+    map.on('popupopen', function(e) {
+      var popup = e.popup;
+      var c = popup._container;
+      if (!c) { return; }
+      var source = popup._source;
+      var country = (source && source.feature) ? source.feature.properties.country : 'Country';
+      c.setAttribute('role', 'dialog');
+      c.setAttribute('aria-label', country + ' participants');
+
+      var close = c.querySelector('.leaflet-popup-close-button');
+      if (close) {
+        close.setAttribute('role', 'button');
+        close.setAttribute('aria-label', 'Close ' + country + ' participants');
+        close.setAttribute('title', 'Close');
+        close.addEventListener('click', function() { returnFocusToMarker(source); });
+      }
+
+      var content = popup._contentNode;
+      if (content) {
+        content.setAttribute('tabindex', '0'); // lets keyboard users scroll long lists
+        try { content.focus({ preventScroll: true }); } catch (err) { content.focus(); }
+      }
+
+      if (!c._a11yKeys) {
+        c._a11yKeys = true;
+        c.addEventListener('keydown', function(ev) {
+          ev.stopPropagation(); // keep the map's arrow-key panning from hijacking popup scrolling
+          if (ev.key === 'Escape' || ev.key === 'Esc' || ev.keyCode === 27) {
+            map.closePopup();
+            returnFocusToMarker(source);
+          }
+        });
+      }
+    });
+
+    function returnFocusToMarker(layer) {
+      if (layer && layer._path && layer._path.getAttribute('tabindex') === '0') {
+        layer._path.focus();
+      }
+    }
 
     // function to set the layer properties
     function setLayerProperties(layer, radius) {
@@ -7597,4 +7961,5 @@
     };
 
   </script>
+</body>
 </html>
