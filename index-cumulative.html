@@ -17,7 +17,7 @@
       position: fixed;
       width: 700px;
       top: 10px;
-      left: 48px;
+      left: 64px; /* clear of the 44px zoom buttons */
       height: 52px;
       background-color: white;
       box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
@@ -85,7 +85,7 @@
 
     #slider {
       position: absolute;
-      height: 43px;
+      height: 56px;
       bottom: 0px;
       left: 120px;
       z-index: 1000;
@@ -98,7 +98,7 @@
 
     #temporal {
       background-color: white;
-      height: 43px
+      height: 56px
     }
 
     /* A11Y: darker button colors (white text 7.05:1; hover 11.4:1; was 3.85:1 / 2.13:1),
@@ -115,13 +115,13 @@
       font-family: 'Montserrat', sans-serif;
       margin: 5px;
       position: absolute;
-      top: 45px;
+      top: 85px; /* below the (now taller) Participant Data control */
       right: 10px;
       cursor: pointer;
     }
 
     #table-link {
-      top: 95px;
+      top: 135px;
     }
 
     #main-map:hover, #table-link:hover {
@@ -270,18 +270,123 @@
     /* Reflow: keep the header inside narrow viewports (WCAG 1.4.10) */
     @media (max-width: 800px) {
       header {
-        width: calc(100% - 58px);
+        width: calc(100% - 74px);
         height: auto;
         min-height: 52px;
       }
     }
 
+    /* ===== ENHANCED TARGET SIZE (WCAG 2.5.5, 44 x 44 CSS px) and ENHANCED CONTRAST (WCAG 1.4.6, 7:1) ===== */
+    .skip-link, #main-map, #table-link, #timeline-anm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    #formsubmit, #formreset {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    select {
+      min-height: 44px;
+      min-width: 44px;
+      box-sizing: border-box;
+    }
+    input[type="range"] {
+      min-height: 44px;
+      margin: 0;
+    }
+    summary {
+      min-height: 44px;
+      box-sizing: border-box;
+      padding: 10px 0;
+    }
+    #results-table li a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0 2px;
+      box-sizing: border-box;
+    }
+
+    /* Radio buttons and checkboxes: drawn at a visible 28px inside a 44px clickable box */
+    input[type="radio"], input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      vertical-align: middle;
+      background-color: transparent;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 28px 28px;
+      cursor: pointer;
+    }
+    input[type="radio"] {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='white' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+    }
+    input[type="radio"]:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Ccircle cx='14' cy='14' r='11' fill='white' stroke='%23000' stroke-width='2'/%3E%3Ccircle cx='14' cy='14' r='6' fill='%2300607F'/%3E%3C/svg%3E");
+    }
+    input[type="checkbox"] {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='3' y='3' width='22' height='22' rx='3' fill='white' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+    }
+    input[type="checkbox"]:checked {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='3' y='3' width='22' height='22' rx='3' fill='%2300607F' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M8 14.5l4 4 8-9' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E");
+    }
+
+    /* Leaflet's built-in controls: 44px zoom buttons, readable attribution, closable popups */
+    .leaflet-control-zoom a, .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+      width: 44px !important;
+      height: 44px !important;
+      line-height: 44px !important;
+      font-size: 24px !important;
+    }
+    .leaflet-control-zoom a.leaflet-disabled {
+      color: #595959 !important;
+      cursor: default;
+    }
+    .leaflet-control-attribution {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+    }
+    .leaflet-control-attribution a {
+      display: inline-block;
+      min-width: 44px;
+      min-height: 44px;
+      line-height: 44px;
+      text-align: center;
+      color: #00406B !important;
+    }
+    .leaflet-popup-content a {
+      color: #00406B;
+    }
+    .leaflet-container a.leaflet-popup-close-button {
+      width: 44px;
+      height: 44px;
+      line-height: 44px;
+      font-size: 28px;
+      top: 0;
+      right: 0;
+      padding: 0;
+      text-align: center;
+      color: #222222 !important;
+    }
   </style>
 </head>
 
 <body>
-  <a class="skip-link" href="#map">Skip to map</a>
-  <a class="skip-link" href="#results-heading">Skip to data table</a>
+  <nav aria-label="Skip links">
+    <a class="skip-link" href="#map">Skip to map</a>
+    <a class="skip-link" href="#results-heading">Skip to data table</a>
+  </nav>
   <header>
     <a href="https://iwp.uiowa.edu/" target="_blank" rel="noopener"><img class='logo-resize' src='images/iwp-logo.png' alt="University of Iowa International Writing Program home page (opens in a new window)"/></a>
     <h1>THE UNIVERSITY OF IOWA INTERNATIONAL WRITING PROGRAM:<br>1967-PRESENT</h1>
@@ -301,7 +406,7 @@
     <!-- end slider -->
     <!-- temporal legend -->
     <div id='temporal' class='py6 px12 border border--gray-light round bottom left wmax200'>
-      <div class='txt-bold year-label'>Year: <span></span></div>
+      <div class='txt-bold year-label'>Year: <span>1966</span></div>
     </div>
     <!-- end temporal -->
     <a id="main-map" class="main-map" href="index.html">Back to Main Map</a>
@@ -315,7 +420,9 @@
         <thead>
           <tr><th scope="col">Country</th><th scope="col">Total participants</th><th scope="col">Writers</th></tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr><td colspan="3">Results appear here once the map data has loaded.</td></tr>
+        </tbody>
       </table>
     </section>
   </main>
@@ -1038,6 +1145,15 @@
         tr.appendChild(tdW);
         tbody.appendChild(tr);
       });
+
+      if (list.length === 0) {
+        var emptyRow = document.createElement('tr');
+        var emptyCell = document.createElement('td');
+        emptyCell.setAttribute('colspan', '3');
+        emptyCell.textContent = 'No participants through ' + year + '.';
+        emptyRow.appendChild(emptyCell);
+        tbody.appendChild(emptyRow);
+      }
 
       a11yLastSummary = 'Year ' + year + ': ' + list.length + (list.length === 1 ? ' country' : ' countries') +
         ' with participants, ' + grand + (grand === 1 ? ' participant' : ' participants') + ' in total.';
